@@ -1,0 +1,11 @@
+C:\Users\balti\source\repos\Simulace\Simulace\bin\Debug\Simulace.exe.config
+C:\Users\balti\source\repos\Simulace\Simulace\bin\Debug\Simulace.exe
+C:\Users\balti\source\repos\Simulace\Simulace\bin\Debug\Simulace.pdb
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.csprojResolveAssemblyReference.cache
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.Form1.resources
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.Properties.Resources.resources
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.csproj.GenerateResource.Cache
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.csproj.CoreCompileInputs.cache
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.exe
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.pdb
+C:\Users\balti\source\repos\Simulace\Simulace\obj\Debug\Simulace.SettingsForm.resources
