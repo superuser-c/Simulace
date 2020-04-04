@@ -1,2 +1,2 @@
 # Simulace
-Simulace sireni nemoci v (CZ code)
+Simulace sireni nemoci
