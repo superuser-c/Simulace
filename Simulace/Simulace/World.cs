@@ -255,7 +255,7 @@ namespace Simulace {
                     gt + ttDead[i] * gh / population.Count +
                     totalImune[vNam][i] * gh / population.Count);
             }
-            pts[pts.Length - 1] = new PointF(gl + gw, gt + gh);
+            pts[pts.Length - 1] = new PointF(gl + gw, gt);
             g.FillPolygon(Brushes.Gray, pts);
             
             pts = new PointF[totalDead[vNam].Count + 1];
@@ -264,7 +264,7 @@ namespace Simulace {
                     gt + totalDead[vNam][i] * gh / population.Count +
                     totalImune[vNam][i] * gh / population.Count);
             }
-            pts[pts.Length - 1] = new PointF(gl + gw, gt + gh);
+            pts[pts.Length - 1] = new PointF(gl + gw, gt);
             g.FillPolygon(Brushes.Black, pts);
 
             pts = new PointF[totalImune[vNam].Count + 1];
@@ -272,7 +272,7 @@ namespace Simulace {
                 pts[i] = new PointF(gl + i * gw / (totalImune[vNam].Count - 1),
                     gt + totalImune[vNam][i] * gh / population.Count);
             }
-            pts[pts.Length - 1] = new PointF(gl + gw, gt + gh);
+            pts[pts.Length - 1] = new PointF(gl + gw, gt);
             g.FillPolygon(Brushes.Purple, pts);
         }
 
