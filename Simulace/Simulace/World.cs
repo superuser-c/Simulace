@@ -33,9 +33,16 @@ namespace Simulace {
         public bool walks;
         public List<int> ttDead = new List<int>();
         public int tDead = 0;
+        public float workRate;
+        public int rendMode = 0;
 
         public World() {
             Dock = DockStyle.Fill;
+            Click += new EventHandler(SwitchCitRend);
+        }
+
+        private void SwitchCitRend(object s, EventArgs e) {
+            rendMode = (rendMode + 1) % 3;
         }
 
         public void Init() {
@@ -96,7 +103,7 @@ namespace Simulace {
                     work.Y + random.Next(51) - 25);
             } while (home.X < 0 || home.Y < 0 ||
                 home.X >= worldSize || home.Y >= worldSize);
-            return new Citizen(home, work, ifdc);
+            return new Citizen(home, work, ifdc, workRate);
         }
 
         public void UpdateWorld() {

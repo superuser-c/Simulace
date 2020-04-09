@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace Simulace {
     class InfectionData {
-        public Virus virus; // virus - ubsahuje statistiky viru
+        public Virus virus; // virus - obsahuje statistiky viru
         public bool infected; // je nakazeny?
         public int infectContact; // jak dlouho stykal se s nakazenym?
         public int infectTime; // jak dlouho je nakazeny?
@@ -48,13 +48,14 @@ namespace Simulace {
         public Point pos; // pozice
         private Point home; // bydliste
         private Point work; // prace
+        private bool works;
         private Point favouritePlace; // mista kam chodi na prochazky
         // cas -> 10 = 0:10, 20 = 0:20, 400 = 6:40
         private uint wakeTime; // kdy vstava
         private uint sleepTime; // kdy usina
 
         public Citizen(Point h, Point w, 
-            Dictionary<string, InfectionData> ifd) {
+            Dictionary<string, InfectionData> ifd, float workRate) {
             this.ifd = ifd;
             alive = true;
             home = h;
@@ -65,6 +66,7 @@ namespace Simulace {
             sleepTime = 990 + workdist;
             favouritePlace = new Point(home.X + random.Next(51) - 25,
                     home.Y + random.Next(51) - 25);
+            works = random.NextDouble() < workRate;
         }
 
         public List<Virus> Infections() {
@@ -163,7 +165,7 @@ namespace Simulace {
                     GoAt(new Point(random.Next(12, 20), random.Next(12, 20)));
                     return;
                 }
-                if (workday) {
+                if (works && workday) {
                     if (daytime < wakeTime || daytime > sleepTime)
                         return; // spi, nic nedela
                     if (daytime < 510) // do 8:30 cesta do prace
@@ -177,7 +179,9 @@ namespace Simulace {
                         return; // spi, nic nedela
                     if (daytime < 840) // do 14:00 odpocinek
                         return;
-                    else if (daytime < 1020 && walks) { // do 17:00 prochazeni
+                    if (!walks)
+                        return;
+                    if (daytime < 1020) { // do 17:00 prochazeni
                         if (random.Next(2) == 0)
                             Wander();
                         else

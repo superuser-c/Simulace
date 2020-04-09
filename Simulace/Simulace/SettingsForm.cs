@@ -13,6 +13,7 @@ namespace Simulace {
         public int speed = 3;
         public Virus[] v = new Virus[0];
         public bool walks;
+        public float workRate;
 
         public SettingsForm() {
             InitializeComponent();
@@ -24,6 +25,7 @@ namespace Simulace {
 
         private void button1_Click(object sender, EventArgs e) {
             Int32.TryParse(textBox1.Text, out speed);
+            Single.TryParse(textBox2.Text, out workRate);
             walks = checkBox1.Checked;
             v = new Virus[dataGridView1.RowCount - 1];
             int i = 0;
