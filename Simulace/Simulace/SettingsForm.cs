@@ -17,6 +17,9 @@ namespace Simulace {
 
         public SettingsForm() {
             InitializeComponent();
+            dataGridView1.Rows.Add(
+                "a", "2", "0", "0.1", "4", "0", "1", "1", "0.5");
+            button1_Click(null, null);
         }
 
         private void SettingsForm_Load(object sender, EventArgs e) {

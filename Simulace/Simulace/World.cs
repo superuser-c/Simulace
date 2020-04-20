@@ -33,6 +33,10 @@ namespace Simulace {
         public bool walks;
         public List<int> ttDead = new List<int>();
         public int tDead = 0;
+        public List<int> ttIf = new List<int>();
+        public int tIf = 0;
+        public List<int> ttIm = new List<int>();
+        public int tIm = 0;
         public float workRate;
         public int rendMode = 0;
 
@@ -45,7 +49,7 @@ namespace Simulace {
             rendMode = (rendMode + 1) % 3;
         }
 
-        public void Init() {
+        public void Init(Form f) {
             population = new List<Citizen>();
             workPlaces = new List<Point>();
             Dictionary<string, InfectionData> ifd =
@@ -66,28 +70,32 @@ namespace Simulace {
                 imune.Add(v.name, 0);
             }
             int i;
-            for (i = 0; i < 32; i++) { // 64 praci
+            for (i = 0; i < 32; i++) { // 32 praci
                 workPlaces.Add(new Point(random.Next(worldSize),
                     random.Next(worldSize)));
             }
-            for (i = 0; i < 1000; i++) { // 1024 obyvatel
+            for (i = 0; i < 1000; i++) { // 1000 obyvatel
                 population.Add(CreateCitizen(ifd));
                 if (i < viruses.Length * 2) {
                     population[i].ifd[viruses[i / 2].name].Infect();
                     infected[viruses[i / 2].name]++;
+                    tIf++;
                 }
             }
-            buffers[0] = new Bitmap(worldSize * scale + 400,
+            buffers[0] = new Bitmap(worldSize * scale + 800,
                 worldSize * scale + topOffset);
-            buffers[1] = new Bitmap(worldSize * scale + 400,
+            buffers[1] = new Bitmap(worldSize * scale + 800,
                 worldSize * scale + topOffset);
             SwapBuffers();
+            f.ClientSize = buffers[0].Size;
             foreach (Virus v in viruses) {
                 totalInfected[v.name].Add(infected[v.name]);
                 totalDead[v.name].Add(dead[v.name]);
                 totalImune[v.name].Add(imune[v.name]);
             }
             ttDead.Add(tDead);
+            ttIf.Add(tIf);
+            ttIm.Add(tIm);
         }
 
         private Citizen CreateCitizen(Dictionary<string, InfectionData> ifd) {
@@ -120,21 +128,23 @@ namespace Simulace {
                     totalImune[v.name].Add(imune[v.name]);
                 }
                 ttDead.Add(tDead);
+                ttIf.Add(tIf);
+                ttIm.Add(tIm);
             }
             bool workday = !(day % 7 == 0 || day % 7 == 6);
             foreach (Citizen c in population) {
                 if (!c.alive)
                     continue;
                 c.Tick(daytime, workday, walks);
-                if (c.pos.X > 19 || c.pos.Y > 19 || c.pos.X < 12 || c.pos.Y < 12
-                    || random.Next(5) == 0)
+                if ((c.pos.X > 19 || c.pos.Y > 19 || c.pos.X < 12 || c.pos.Y < 12
+                    || random.Next(50) == 0) && !c.FullImune())
                     Spread(c);
             }
         }
 
         private void Spread(Citizen c) {
             foreach (Citizen c2 in population) {
-                if (c2.alive && c.Distance(c2.pos) < 2) {
+                if (c2.alive && !c.FullImune() && c.Distance(c2.pos) < 2) {
                     foreach (var inf in c2.Infections()) {
                         if (!c.ifd[inf.name].infected && 
                             !c.ifd[inf.name].longImunity)
@@ -145,7 +155,7 @@ namespace Simulace {
         }
 
         private void TryInfect(Citizen c) {
-            if (!c.alive)
+            if (!c.alive || c.FullImune())
                 return;
             foreach (var i in c.ifd) {
                 if (i.Value.infected) {
@@ -160,6 +170,7 @@ namespace Simulace {
                                 i.Value.virus.deathRateStart) {
                                 tDead++;
                                 dead[i.Value.virus.name]++;
+                                tIf--;
                                 foreach (Virus v in c.Infections()) {
                                     infected[v.name]--;
                                 }
@@ -176,6 +187,7 @@ namespace Simulace {
                                 i.Value.virus.deathRateEnd) {
                                 tDead++;
                                 dead[i.Value.virus.name]++;
+                                tIf--;
                                 foreach (Virus v in c.Infections()) {
                                     infected[v.name]--;
                                 }
@@ -194,10 +206,14 @@ namespace Simulace {
                             i.Value.infectTime = 0;
                             i.Value.infectContact = 0;
                             infected[i.Value.virus.name]--;
+                            if (!c.Infected())
+                                tIf--;
                             if (random.NextDouble() <
                                 i.Value.virus.longImunityChance) {
                                 i.Value.longImunity = true;
                                 imune[i.Value.virus.name]++;
+                                if (c.FullImune())
+                                    tIm++;
                             }
                         }
                     }
@@ -205,10 +221,14 @@ namespace Simulace {
                 if (!i.Value.infected && 
                     i.Value.infectContact > i.Value.virus.TRNeed) {
                     if (i.Value.infectContact >= i.Value.virus.TRTop) {
+                        if (!c.Infected())
+                            tIf++;
                         i.Value.Infect();
                         infected[i.Value.virus.name]++;
                     } else if (random.Next(i.Value.virus.TRTop - 
                         i.Value.infectContact) < i.Value.virus.TR) {
+                        if (!c.Infected())
+                            tIf++;
                         i.Value.Infect();
                         infected[i.Value.virus.name]++;
                     }
@@ -226,29 +246,70 @@ namespace Simulace {
         }
 
         public void RenderInfo() {
-            g.FillRectangle(Brushes.Silver, 0, 0, Width, topOffset);
+            g.FillRectangle(Brushes.Silver, 0, 0, buffers[0].Width, topOffset);
             int x = scale * worldSize;
-            g.FillRectangle(Brushes.Silver, x, 0, Width - x, Height);
+            g.FillRectangle(Brushes.Silver, x, 0, 
+                buffers[0].Width - x, buffers[0].Height);
             g.DrawString("day " + day + " " + daytime / 60 + ":" + 
                 (daytime % 60 < 10 ? "0" : "") + daytime % 60 + 
-                "; dead: " + tDead,
+                "\ndead: " + tDead + "; infected: " + tIf + "; imune: " + tIm,
                 new Font("Lucida", 16, FontStyle.Bold), Brushes.Black,
                 new Point());
-            int y = 5;
+            if (ttIf.Count < 2) return;
+            int y = 2, yPush = (buffers[0].Height - 2 - 
+                                27 * viruses.Length) / viruses.Length;
             x += 2;
             foreach (Virus v in viruses) {
                 g.DrawString(v.name + ":", new Font("Lucida", 16, FontStyle.Bold),
                     Brushes.Black, new Point(x, y));
                 y += 25;
-                RendGraph(v.name, x, y);
-                y += 62;
+                RendGraph(v.name, x, y, 396, yPush);
+                y += 2 + yPush;
             }
+            float gl = x + 400;
+            float gt = 2;
+            float gw = 396;
+            float gh = buffers[0].Height - 4;
+            g.FillRectangle(Brushes.White, gl, gt, gw, gh);
+            PointF[] pts = new PointF[ttIf.Count + 1];
+            for (int i = 0; i < ttIf.Count; i++) {
+                pts[i] = new PointF(gl + i * gw / (ttIf.Count - 1),
+                    gt + gh - ttIf[i] * gh / population.Count);
+            }
+            pts[pts.Length - 1] = new PointF(gl + gw, gt + gh);
+            g.FillPolygon(Brushes.Red, pts);
+
+            pts = new PointF[ttDead.Count + 1];
+            for (int i = 0; i < ttDead.Count; i++) {
+                pts[i] = new PointF(gl + i * gw / (ttDead.Count - 1),
+                    gt + ttDead[i] * gh / population.Count +
+                    ttIm[i] * gh / population.Count);
+            }
+            pts[pts.Length - 1] = new PointF(gl + gw, gt);
+            g.FillPolygon(Brushes.Black, pts);
+
+            pts = new PointF[ttIm.Count + 1];
+            for (int i = 0; i < ttIm.Count; i++) {
+                pts[i] = new PointF(gl + i * gw / (ttIm.Count - 1),
+                    gt + ttIm[i] * gh / population.Count);
+            }
+            pts[pts.Length - 1] = new PointF(gl + gw, gt);
+            g.FillPolygon(Brushes.Purple, pts);
         }
 
         private void RendGraph(string vNam, float gl,  float gt, 
             float gw = 200, float gh = 60) {
             g.FillRectangle(Brushes.White, gl, gt, gw, gh);
-            PointF[] pts = new PointF[totalInfected[vNam].Count + 1];
+
+            PointF[] pts = new PointF[ttIf.Count + 1];
+            for (int i = 0; i < ttIf.Count; i++) {
+                pts[i] = new PointF(gl + i * gw / (ttIf.Count - 1),
+                    gt + gh - ttIf[i] * gh / population.Count);
+            }
+            pts[pts.Length - 1] = new PointF(gl + gw, gt + gh);
+            g.FillPolygon(Brushes.LightSalmon, pts);
+
+            pts = new PointF[totalInfected[vNam].Count + 1];
             for (int i = 0; i < totalInfected[vNam].Count; i++) {
                 pts[i] = new PointF(gl + i * gw / (totalInfected[vNam].Count - 1),
                     gt + gh - totalInfected[vNam][i] * gh / population.Count);
@@ -281,6 +342,14 @@ namespace Simulace {
             }
             pts[pts.Length - 1] = new PointF(gl + gw, gt);
             g.FillPolygon(Brushes.Purple, pts);
+
+            pts = new PointF[ttIm.Count + 1];
+            for (int i = 0; i < ttIm.Count; i++) {
+                pts[i] = new PointF(gl + i * gw / (ttIm.Count - 1),
+                    gt + ttIm[i] * gh / population.Count);
+            }
+            pts[pts.Length - 1] = new PointF(gl + gw, gt);
+            g.FillPolygon(Brushes.Violet, pts);
         }
 
         public void RenderCitizens() {

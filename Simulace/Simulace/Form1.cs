@@ -22,7 +22,7 @@ namespace Simulace {
             world.timestep = settings.speed;
             world.walks = settings.walks;
             world.workRate = settings.workRate;
-            world.Init();
+            world.Init(this);
             timer.Enabled = true;
         }
 
