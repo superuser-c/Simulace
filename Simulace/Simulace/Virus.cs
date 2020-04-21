@@ -6,16 +6,41 @@ using System.Threading.Tasks;
 
 namespace Simulace {
     public class Virus {
+        /// <summary>
+        /// inkubacni doba ve dnech
+        /// </summary>
         public int incubationPeriod;
-        public float deathRateStart, deathRateEnd;
-        // start - sance na umrti kazdy den v prvni polovine nemoci
-        // end - sance kazdy den v druhe polovine
+        /// <summary>
+        /// sance na umrti kazdy den v prvni polovine nemoci
+        /// </summary>
+        public float deathRateStart;
+        /// <summary>
+        /// sance kazdy den v druhe polovine
+        /// </summary>
+        public float deathRateEnd;
+        /// <summary>
+        /// jak dlouho nemoc trva?
+        /// </summary>
         public int illnessTime;
-        public int TRNeed, TRTop, TR;
-        // TR - prenosnost
-        // TRNeed - potrebny kontakt s nakazenym
-        // TRTop - maximalni kontaks s nakazenym (100% se nakazi)
+        /// <summary>
+        /// potrebny kontakt s nakazenym aby se nakazil dalsi
+        /// </summary>
+        public int TRNeed;
+        /// <summary>
+        /// maximalni kontakt s nakazenym (100% se nakazi)
+        /// </summary>
+        public int TRTop;
+        /// <summary>
+        /// sance na nakazeni; nakazi se? = (Rand(TRTop - kontakty) &lt; TR)
+        /// </summary>
+        public int TR;
+        /// <summary>
+        /// sance na ziskani plne imunity na virus
+        /// </summary>
         public float longImunityChance;
+        /// <summary>
+        /// jmeno viru
+        /// </summary>
         public string name;
 
         public Virus(int ip, float drs, float dre, int it, 

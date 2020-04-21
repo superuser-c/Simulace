@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace Simulace {
     public partial class SettingsForm : Form {
+        /// <summary>
+        /// rychlost simulace v min/s
+        /// </summary>
         public int speed = 3;
         public Virus[] v = new Virus[0];
         public bool walks;
@@ -18,7 +21,7 @@ namespace Simulace {
         public SettingsForm() {
             InitializeComponent();
             dataGridView1.Rows.Add(
-                "a", "2", "0", "0.1", "4", "0", "1", "1", "0.5");
+                "flu", "1", "0", "0.01", "6", "5", "100000", "10000", "0.005");
             button1_Click(null, null);
         }
 

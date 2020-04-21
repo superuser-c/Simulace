@@ -19,6 +19,7 @@ namespace Simulace {
         public uint day = 1;
         private int scale = 4;
         private int topOffset = 64;
+        // grafy - data
         public Dictionary<string, List<int>> totalInfected = 
             new Dictionary<string, List<int>>();
         public Dictionary<string, List<int>> totalDead = 
@@ -28,15 +29,18 @@ namespace Simulace {
         private Dictionary<string, int> infected = new Dictionary<string, int>();
         private Dictionary<string, int> dead = new Dictionary<string, int>();
         private Dictionary<string, int> imune = new Dictionary<string, int>();
+        
         public Virus[] viruses;
         public int timestep;
         public bool walks;
+        // grafy data
         public List<int> ttDead = new List<int>();
         public int tDead = 0;
         public List<int> ttIf = new List<int>();
         public int tIf = 0;
         public List<int> ttIm = new List<int>();
         public int tIm = 0;
+
         public float workRate;
         public int rendMode = 0;
 
@@ -44,7 +48,7 @@ namespace Simulace {
             Dock = DockStyle.Fill;
             Click += new EventHandler(SwitchCitRend);
         }
-
+        
         private void SwitchCitRend(object s, EventArgs e) {
             rendMode = (rendMode + 1) % 3;
         }
@@ -59,8 +63,7 @@ namespace Simulace {
                     virus = v,
                     infectContact = 0,
                     infected = false,
-                    infectTime = 0,
-                    recovered = false
+                    infectTime = 0
                 });
                 totalInfected.Add(v.name, new List<int>());
                 totalDead.Add(v.name, new List<int>());
@@ -98,6 +101,10 @@ namespace Simulace {
             ttIm.Add(tIm);
         }
 
+        /// <summary>
+        /// vytvori obyvatele
+        /// </summary>
+        /// <param name="ifd">jaka ma mit pocatecni data o infekcich</param>
         private Citizen CreateCitizen(Dictionary<string, InfectionData> ifd) {
             Dictionary<string, InfectionData> ifdc =
                 new Dictionary<string, InfectionData>();
@@ -201,7 +208,6 @@ namespace Simulace {
                             }
                         }
                         if (i.Value.infectTime >= i.Value.virus.illnessTime) {
-                            i.Value.recovered = true;
                             i.Value.infected = false;
                             i.Value.infectTime = 0;
                             i.Value.infectContact = 0;

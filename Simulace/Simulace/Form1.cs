@@ -23,6 +23,8 @@ namespace Simulace {
             world.walks = settings.walks;
             world.workRate = settings.workRate;
             world.Init(this);
+            world.BackColor = Color.Black;
+            world.SizeMode = PictureBoxSizeMode.Zoom;
             timer.Enabled = true;
         }
 

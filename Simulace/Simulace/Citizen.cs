@@ -6,53 +6,118 @@ using System.Threading.Tasks;
 using System.Drawing;
 
 namespace Simulace {
+    /// <summary>
+    /// data o jednotlive infekci
+    /// </summary>
     class InfectionData {
-        public Virus virus; // virus - obsahuje statistiky viru
-        public bool infected; // je nakazeny?
-        public int infectContact; // jak dlouho stykal se s nakazenym?
-        public int infectTime; // jak dlouho je nakazeny?
-        public bool recovered; // uzdravil se?
+        /// <summary>
+        /// statistiky viru
+        /// </summary>
+        public Virus virus;
+        /// <summary>
+        /// je nakazeny?
+        /// </summary>
+        public bool infected;
+        /// <summary>
+        /// kolik mel kontaktu s nakazenym?
+        /// </summary>
+        public int infectContact;
+        /// <summary>
+        /// jak dlouho uz je nakazeny?
+        /// </summary>
+        public int infectTime;
+        /// <summary>
+        /// uzdravil se?
+        /// </summary>
+        [Obsolete("this field is deprecated")]
+        public bool recovered;
+        /// <summary>
+        /// ma obcan imunitu proti nemoci?
+        /// </summary>
         public bool longImunity;
 
+        /// <summary>
+        /// nakazi obcana
+        /// </summary>
         public void Infect() {
             infected = true;
         }
 
+        /// <summary>
+        /// prida kontakt s nakazenym
+        /// </summary>
         public void AddContact() {
             infectContact++;
         }
 
+        /// <summary>
+        /// odstrani vestinu kontaktu s nakazenymi
+        /// </summary>
         public void RemoveContacts() {
             infectContact /= 50;
         }
 
+        /// <summary>
+        /// zkopiruje objekt do noveho
+        /// </summary>
+        /// <returns>kopie objektu</returns>
         public InfectionData Clone() {
             return new InfectionData() {
                 virus = virus.Clone(),
                 infected = infected,
                 infectContact = infectContact,
                 infectTime = infectTime,
-                recovered = recovered,
                 longImunity = longImunity
             };
         }
     }
-
-    // obsahuje chovani obyvatel
-    // obyvatele chodi do prace a o vikendu na prochazky
+    
+    /// <summary>
+    /// obsahuje chovani obyvatel;
+    /// obyvatele chodi do prace a o vikendu na prochazky
+    /// </summary>
     class Citizen {
         private static Random random = new Random();
         
+        /// <summary>
+        /// je nazivu?
+        /// </summary>
         public bool alive;
+        /// <summary>
+        /// data  o infekcich
+        /// </summary>
         public Dictionary<string, InfectionData> ifd;
-        public Point pos; // pozice
-        private Point home; // bydliste
-        private Point work; // prace
+        /// <summary>
+        /// pozice
+        /// </summary>
+        public Point pos;
+        /// <summary>
+        /// pozice domu
+        /// </summary>
+        private Point home;
+        /// <summary>
+        /// pozice prace
+        /// </summary>
+        private Point work;
+        /// <summary>
+        /// pracuje nebo jen chodi na prochazky
+        /// false chodi na prochazky kazdy den
+        /// </summary>
         private bool works;
-        private Point favouritePlace; // mista kam chodi na prochazky
+        /// <summary>
+        /// oblibene prochazkove misto,
+        /// priblizne tam chodi
+        /// </summary>
+        private Point favouritePlace;
         // cas -> 10 = 0:10, 20 = 0:20, 400 = 6:40
-        private uint wakeTime; // kdy vstava
-        private uint sleepTime; // kdy usina
+        /// <summary>
+        /// kdy vstava?
+        /// </summary>
+        private uint wakeTime;
+        /// <summary>
+        /// kdy usina?
+        /// </summary>
+        private uint sleepTime;
 
         public Citizen(Point h, Point w, 
             Dictionary<string, InfectionData> ifd, float workRate) {
@@ -69,6 +134,10 @@ namespace Simulace {
             works = random.NextDouble() < workRate;
         }
 
+        /// <summary>
+        /// vrati vsechny viry, kterimi je nakazen
+        /// </summary>
+        /// <returns>list viru</returns>
         public List<Virus> Infections() {
             List<Virus> o = new List<Virus>();
             foreach (var i in ifd) {
@@ -78,6 +147,9 @@ namespace Simulace {
             return o;
         }
 
+        /// <summary>
+        /// ma nejakou nemoc?
+        /// </summary>
         public bool Infected() {
             foreach (var i in ifd) {
                 if (i.Value.infected)
@@ -86,6 +158,9 @@ namespace Simulace {
             return false;
         }
 
+        /// <summary>
+        /// je nakazeny, a uz to je po inkubacni dobe?
+        /// </summary>
         public bool InfectedWithSymptoms() {
             foreach (var i in ifd) {
                 if (i.Value.infected && 
@@ -95,6 +170,9 @@ namespace Simulace {
             return false;
         }
 
+        /// <summary>
+        /// je imuni proti vsemu?
+        /// </summary>
         public bool FullImune() {
             foreach (var i in ifd) {
                 if (!i.Value.longImunity)
@@ -103,10 +181,19 @@ namespace Simulace {
             return true;
         }
 
+        /// <summary>
+        /// jak daleko je od mista?
+        /// </summary>
+        /// <param name="target">cil</param>
+        /// <returns>vzdalenost od cile</returns>
         public int Distance(Point target) {
             return Math.Abs(pos.X - target.X) + Math.Abs(pos.Y - target.Y);
         }
 
+        /// <summary>
+        /// posune se o policko smerem k cili
+        /// </summary>
+        /// <param name="target">cil</param>
         private void GoAt(Point target) {
             Point dir = new Point();
             if (pos.X < target.X)
@@ -130,6 +217,9 @@ namespace Simulace {
             }
         }
 
+        /// <summary>
+        /// pracuje
+        /// </summary>
         private void DoWork() {
             if (Distance(work) < 3)
                 Wander();
@@ -137,6 +227,9 @@ namespace Simulace {
                 GoAt(work);
         }
 
+        /// <summary>
+        /// toulani, posune se o policko na nahodnou stranu
+        /// </summary>
         private void Wander() {
             int move = random.Next(4);
             switch (move) {
@@ -157,6 +250,12 @@ namespace Simulace {
             }
         }
 
+        /// <summary>
+        /// tik
+        /// </summary>
+        /// <param name="daytime">jaky je cas?</param>
+        /// <param name="workday">je pracovni den?</param>
+        /// <param name="walks">jsou povolene prochazky?</param>
         public void Tick(uint daytime, bool workday, bool walks) {
             if (alive) {
                 if (InfectedWithSymptoms()) {
